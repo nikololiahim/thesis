@@ -1,0 +1,13 @@
+[] > base
+  [self v] > f
+    v > @
+  [self v] > g
+    self.f > @
+      self
+      v
+[] > derived
+  base > @
+  [self v] > f
+    self.g > @
+      self
+      v

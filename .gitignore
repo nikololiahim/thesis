@@ -1,0 +1,16 @@
+**/*.aux
+**/*.bbl
+**/*.bcf
+**/*.blg
+**/*.fdb_latexmk
+**/*.fls
+**/*.lof
+**/*.log
+**/*.lot
+**/*.out
+thesis.pdf
+**/*.run.xml
+**/*.synctex.gz
+**/*.toc
+
+

@@ -1,0 +1,80 @@
+\chapter{Implementation}
+\label{chap:impl}
+This chapter analyzes specifics of Odin (short for Object Dependency INspector) - a static analyzer of EO source code. Section 4.1 covers the tools and technologies used in the project. Section 4.2 gives a brief overview of the project file structure.
+Section 4.3 goes over the implementation of EO parser used in the project. Section 4.4 discusses the ways we can represent the elements of object-oriented programs in EO. Sections 4.5 and 4.6 describe the implementations of the analysis algorithms applied to structured EO code. Finally, section 4.7 summarizes this chapter.
+
+\section{Development Environment}
+Odin is a project written entirely in Scala [15] - a modern programming language with support for high-level concepts such as structural pattern matching and algebraic data types. Scala is compiled into Java Virtual Machine (JVM) byte code. This allows Odin to be used as a library in any other project compatible with JVM, be it Scala or Java. In addition, programs compiled to JVM byte code can be run without changes on any device that can run Java Virtual Machine.
+
+
+The project uses a build tool called sbt. sbt allows compiling multiple Scala modules at once. A distinctive feature of sbt is the ability to compile Scala code in a way that makes it compatible with many Scala versions [16]. It also supports a variety of plugins that improve the development process. The plugins used by Odin are scalafmt, an automatic code formatter for scala, and scalafix, a linter and code analyzer with support for project-wide refactorings.
+
+Odin is published as a JAR [17] and distributed through Maven Central [18].
+
+The source code of the project is available on Github [19].
+
+
+
+\section{Module Structure}
+Odin is a project consisting of multiple modules. The main modules are:
+\begin{itemize}
+    \item Core, which contains the definition for EO AST (Abstract Syntax Tree).
+          This AST is used as an input to all analysis algorithms.
+    \item Analyses, which contains the implementations of various analyzers.
+    \item Backends, which contains algorithms that transform EO AST into something else. The only backend so far is a plain text backend: it transforms EO AST into its syntactically correct equivalent in EO source code. This backend can also be interpreted as a pretty-printer of EO code and is widely used as such in other modules.
+    \item Parser, which contains a parser (also known as a syntactic analyzer) of EO source code. It is used to convert different EO representations (e.g. plain text or XML encoding) into the EO AST defined in Core module.
+\end{itemize}
+\section{Parser}
+The parser used in Odin implements a slightly altered version of EO specification defined by Bugayenko [23]. In particular, it relaxes constraints on whitespace between tokens and the number of newlines and comments between definitions. This is done to reduce the complexity of producing source code pieces for testing and debugging.
+
+The parser was created using cats-parse library [24] for Scala. It provides a parser-combinator [25] approach to building recursive-descent parsers. Recursive-descent parsers are known for their worst-case exponential complexity. This problem can not be avoided in general. However, cats-parse mitigates it by explicitly marking all the places in the parser definition that can cause such spikes in complexity.
+
+\section{Representing Object-Oriented Programming Concepts in EO}
+Before analyzing programs written in object-oriented (OO) programming languages, it is necessary to translate them into EO while preserving the semantics of the original language. This chapter presents a version of such an encoding that is assumed by Odin.
+
+\subsection{Classes}
+Classes are modelled as EO objects that do not take any parameters. Class-level (i.e. "static") attributes become attributes of the class object. Constructor is represented by an attribute-object "new" of the class object. This object may take parameters to produce an instance of the object.
+
+All instance attributes and methods are defined inside the object returned by the "new" object. Inheritance is modelled as decoration in EO. So, a full example of EO translation would look like this. Class instances (a.k.a objects in Java) are created
+by instantiating the "new" object with the required parameters.
+
+
+\subsection{Methods}
+Methods are modelled as EO objects, similarly to classes. These objects can take parameters. Instance methods are required to accept a special "self" attribute in addition to other parameters. This parameter is used to pass an instance of the object calling the method (hence the name - "self"). "self" parameter can be used to call instance methods inside other instance methods.
+
+The return value of the method is represented by the value of the $\Phi$ attribute ("@" symbol in EO). In order to call the instance method we need to instantiate the object first. Then we can call the method by accessing the instance's attribute with the method name and passing the instance object to it as the first argument.
+
+
+\section{Analyses}
+This section describes each of the analysis algorithms in greater detail. First, we will describe the steps that are performed prior to each of the defect-specific analyses: parsing and detecting the significant features of EO programs - objects, methods and extension clauses. Then we will describe the algorithms for detecting each of the covered defects: unanticipated mutual recursion and unjustified assumption in subclass. Finally, we will conclude the chapter by describing the shortcomings of each of the algorithms.
+
+
+\subsection{Preprocessing}
+Before running on
+
+
+\subsection{Unanticipated Mutual Recursion}
+Mutual recursion analysis deals with the following problem: suppose we have an object named Base with two methods - $f$ and $g$. Method $g$ calls method $f$, whereas $f$ does something else.
+
+
+Then, there is a class called Derived that extends Base and redefines the method $f$ in a way that it calls $g$. When we call a method $f$ on an instance of Derived, we get a stack overflow error: method $f$ calls method $g$, method $g$ calls method $f$ and so on (figure \ref{fig:mutualrec_basic}).
+
+
+\begin{figure}
+    \centering
+    \begin{subfigure}{0.4\textwidth}
+        \lstinputlisting[language=Java]{code/mutualrec.java}
+        \caption{Java}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.4\textwidth}
+        \lstinputlisting{code/mutualrec.eo}
+        \caption{EO}
+    \end{subfigure}
+    \caption{Example of unanticipated mutual recursion}
+    \label{fig:mutualrec_basic}
+\end{figure}
+
+\subsection{Unjustified Assumption Analysis}
+
+\subsection{Shortcomings of the algorithms}

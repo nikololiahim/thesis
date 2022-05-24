@@ -1,0 +1,19 @@
+\chapter{Methodology}
+\label{chap:met}
+
+\section{Describing object-oriented programs with EO}
+Before analyzing programs written in object-oriented programming languages, it is necessary to translate them into EO while preserving the semantics of the original language. This chapter presents a version of such an encoding that is assumed by Odin.
+
+\subsection{Classes}
+Classes are modelled as EO objects that do not take any parameters. Class-level (i.e. "static") attributes become attributes of the class object. Constructor is represented by an attribute-object "new" of the class object. This object may take parameters to produce an instance of the object.
+
+All instance attributes and methods are defined inside the object returned by the "new" object. Inheritance is modelled as decoration in EO. So, a full example of EO translation would look like this. Class instances (a.k.a objects in Java) are created
+by instantiating the "new" object with the required parameters.
+
+
+\subsection{Methods}
+Methods are modelled as EO objects, similarly to classes. These objects can take parameters.
+Instance methods are required to accept a special "self" attribute in addition to other parameters. This parameter is used to pass an instance of the object calling the method (hence the name - "self"). 
+"self" parameter can be used to call instance methods inside other instance methods.
+
+The return value of the method is represented by the value of the $\Phi$ attribute ("@" symbol in EO). In order to call the instance method we need to instantiate the object first. Then we can call the method by accessing the instance's attribute with the method name and passing the instance object to it as the first argument.

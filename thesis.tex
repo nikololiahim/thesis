@@ -1,11 +1,12 @@
 % \documentclass[oneside]{report}
 \documentclass[oneside,final,14pt,a4paper]{extreport}
 % \documentclass[journal,onecolumn,a4paper,12pt]{IEEEtran}
-\usepackage[T2A]{fontenc}
+% \usepackage[T2A]{fontenc}
 \usepackage{listings}
 \usepackage{subcaption}
 \usepackage[demo]{graphicx}
-
+% \usepackage{fontspec}
+% \setmainfont{Times New Roman}
 
 
 
@@ -69,10 +70,8 @@
 
 \usepackage{upgreek} 
 \usepackage{bm}
-\usepackage{hyperref}
 \usepackage{setspace}
 \usepackage{booktabs}
-\usepackage{multirow}
 \usepackage{longtable}
 \usepackage[font=singlespacing, labelfont=bf]{caption}
 \counterwithout{table}{chapter}
@@ -126,13 +125,13 @@
 \include{chapters/abstract}
 Depend on above part
 \setcounter{page}{0}
-\include{chapters/chapter1}
-\include{chapters/chapter2}
-\include{chapters/EO_overview}
-\include{chapters/chapter3}
-\include{chapters/chapter4}
-\include{chapters/chapter5}
-\include{chapters/chapter6}
+\include{chapters/introduction}
+\include{chapters/litreview}
+% \include{chapters/EO_overview}
+\include{chapters/methodology}
+\include{chapters/implementation}
+\include{chapters/evaluation}
+\include{chapters/conclusion}
 
 
 %% REFERENCES

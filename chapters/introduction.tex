@@ -20,29 +20,23 @@ known as \textit{methods}. Methods can take parameters and may return a value.
 
 Objects should also obey certain definitive properties. As \cite{oop1} suggests, " the extent to which a particular language satisfies these properties defines how much of an object-oriented language it is." These properties are:
 \begin{itemize}
-    \item Encapsulation - an object should expose a well-defined interface through which it should be consumed.
-          The irrelevant details of how an object implements this interface should be \textit{hidden} from the consumer.
-    \item Inheritance - is a mechanism through which objects can share functionality and extend the behavior of other objects.
-          Inheritance is a complex mechanism and its implementation differs from language to language.
-          As per \cite{oop1}, "Inheritance enables programmers to reuse the definitions of previously defined structures.
-          This clearly reduces the amount of work required in producing".
-    \item Polymorphism - a possibility to define operations on objects in such a way,
-          that they can accept and return values of multiple types.
-    \item Dynamic (or late \cite{alankay}) binding - the implementation of the method to be run on an object is chosen at runtime. This implies that the implementation that is used during the runtime of a program may be \textit{different} from that of a type that is known statically (i.e. at compile time)
-
+      \item Encapsulation - an object should expose a well-defined interface through which it should be consumed. The irrelevant details of how an object implements this interface should be \textit{hidden} from the consumer.
+      \item Inheritance - is a mechanism through which objects can share functionality and extend the behavior of other objects. Inheritance is a complex mechanism and its implementation differs from language to language. As per \cite{oop1}, "Inheritance enables programmers to reuse the definitions of previously defined structures. This clearly reduces the amount of work required in producing".
+      \item Polymorphism - a possibility to define operations on objects in such a way, that they can accept and return values of multiple types.
+      \item Dynamic (or late \cite{alankay}) binding - the implementation of the method to be run on an object is chosen at runtime. This implies that the implementation that is used during the runtime of a program may be \textit{different} from that of a type that is known statically (i.e. at compile time)
 \end{itemize}
 
 \section{Criticism}
 
 Together with increasing adoption, OO programming techniques and languages have gained a substantial amount of valid criticism. Mansfield \cite{oopfailed} mentions most of these complaints, ultimately claiming that "...with OOP-inflected programming languages, computer software becomes more
-verbose, less readable, less descriptive, and harder to modify and maintain". Many of these criticisms are being turned into recommendations, such as the famous "Design patterns: elements of reusable object-oriented software" \cite{GOFPatterns}. However, such recommendations are not the part of the language specification and thus can not be enforced by the language compiler. This leads to these recommendations often being misinterpreted or overused, especially by beginning software engineers.
+verbose, less readable, less descriptive, and harder to modify and maintain". Many of these criticisms are being turned into recommendations, such as the famous "Design patterns: elements of reusable object-oriented software" \cite{GOFPatterns}. However, such recommendations are not the part of the language specification and thus can not be enforced by the language compiler. This leads to these recommendations often being misinterpreted or overused, especially by beginners.
 
 \section{Analysis Tools}
-To mitigate this complexity and enforce good practices, developers have created a lot of software tools. These tools can be divided into two categories: \textit{dynamic analyzers} and \textit{static analyzers}.
+To mitigate this complexity and enforce good practices, developers have created a lot of software tools. These tools can be divided into two categories: \textbf{dynamic analyzers} and \textbf{static analyzers}.
 
-\textit{Dynamic analyzers} (also known as \textit{profilers}) inspect the state of the program as it is being executed. Dynamic analyzers collect important information about the program execution, such as CPU utilization and memory consumption and present it in the human-readable form. This information is crucial in applications where the performance plays an important role. Unfortunately, the tools require the program under analysis to be executed, which can be expensive or even impossible, e.g. when the program is to be run on dedicated hardware.
+\textbf{Dynamic} analyzers (also known as \textit{profilers}) inspect the state of the program as it is being executed. Dynamic analyzers collect important information about the program execution, such as CPU utilization and memory consumption and present it in the human-readable form. This information is crucial in applications where the performance plays an important role. Unfortunately, the tools require the program under analysis to be executed, which can be expensive or even impossible, e.g. when the program is to be run on dedicated hardware.
 
-On the contrary, \textit{static analyzers} inspect the source code of the program (or one of its intermediate representations) \textit{without executing it} to locate common errors, anti-patterns and deviations from the accepted style conventions. Executing such tools isn't usually time-consuming or otherwise expensive, which is why they are a crucial part of continuous integration (CI) pipelines and integrated development environments (IDEs).
+On the contrary, \textbf{static} analyzers inspect the source code of the program (or one of its intermediate representations) \textit{without executing it} to locate common errors, anti-patterns and deviations from the accepted style conventions. Executing such tools isn't usually time-consuming or otherwise expensive, which is why they are a crucial part of continuous integration (CI) pipelines and integrated development environments (IDEs).
 Despite being prone to false positives, static analysis tools can pinpoint the location of the error with greater precision.
 
 Unlike dynamic analyzers, static analyzers operate on the source code, which allows them to inspect the program from a higher-level perspective. This means that static analyzers can improve the error reporting of programming language compilers, discover more problems, and  even automatically fix them.
@@ -54,4 +48,4 @@ make the static analyzer work with more than one target language. In this case t
 
 In this thesis we present an implementation of a static analyzer for object-oriented programming languages with Elegant Objects \cite{eolang} (or EO) as an intermediate representation. This representation is based on $\phi$-calculus, a formal model that is designed to unify the varying semantics of object-oriented (OO) languages. It also claims to be a language with minimum verbosity, providing only the required subset of operators. The combination of a strict formal ground and a reduced feature set make EO a powerful intermediate representation for a static analyzer that should be able to capture many bugs specific to OO programs.
 
-The rest of this thesis is structured as follows: Chapter 2 covers the existing work of finding bugs in OO programs, the semantics of EO and how it represents OO programs, Chapter 3 describes the implementation of the analyzer, Chapter 4 covers the evaluation of the analyzer, including testing and benchmarks and, finally, Chapter 5 concludes the thesis.
+The rest of this thesis is structured as follows: chapter \ref{chap:lr} covers the existing work of finding bugs in OO programs, chapter \ref{chap:met} describes the semantics of EO and how it can represent object-oriented programs, chapter \ref{chap:impl} describes the implementation of the analyzer, chapter \ref{chap:eval} covers the evaluation of the analyzer, including testing and benchmarks and, finally, chapter \ref{chap:conclusion} concludes the thesis.

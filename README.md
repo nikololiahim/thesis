@@ -7,3 +7,9 @@ First, please, replace the stub title with the real one.
 2. Enter the **thesis title, supervisor's and your name** in appropriate places in both English and Russian languages.
 3. Enter current year (last row).
 4. Convert the file to `title.pdf`, replace the existing one in the root folder.
+
+## Times New Roman
+1. To use Times New Roman with Linux, install the fonts with:
+```sh
+sudo apt install ttf-mscorefonts-installer
+```

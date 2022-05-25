@@ -1,7 +1,12 @@
 \chapter{Methodology}
 \label{chap:met}
+This chapter presents the formal basis required to understand the implementation part. Section \ref{met:eo} briefly describes the relevant parts of EO: its syntax and semantics. Section \ref{met:encoding} shows how to encode basic object-oriented constructs (classes, methods, inheritance) by means of EO. Sections \ref{met:mutualrec} and \ref{met:unjustified} explain their respective type of defects and how they can be detected in an EO program. 
+
+\section{Overview of EO}
+\label{met:eo}
 
 \section{Describing object-oriented programs with EO}
+\label{met:encoding}
 Before analyzing programs written in object-oriented programming languages, it is necessary to translate them into EO while preserving the semantics of the original language. This chapter presents a version of such an encoding that is assumed by Odin.
 
 \subsection{Classes}
@@ -17,3 +22,9 @@ Instance methods are required to accept a special "self" attribute in addition t
 "self" parameter can be used to call instance methods inside other instance methods.
 
 The return value of the method is represented by the value of the $\Phi$ attribute ("@" symbol in EO). In order to call the instance method we need to instantiate the object first. Then we can call the method by accessing the instance's attribute with the method name and passing the instance object to it as the first argument.
+
+\section{Detecting Unanticipated Mutual Recursion}
+\label{met:mutualrec}
+
+\section{Detecting Unjustified Assumption in Subclass}
+\label{met:unjustified}

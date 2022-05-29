@@ -1,0 +1,5 @@
+[n] > fib
+  ($.n.less 2).if > @
+    n
+    (fib ($.n.sub 1)).add 
+      (fib ($.n.sub 2))

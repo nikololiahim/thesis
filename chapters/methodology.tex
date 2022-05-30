@@ -27,7 +27,7 @@ Application can be used to create a new object where the values of the some or a
     If an object has one or more free attributes it is called \textbf{abstract} or \textbf{open}. Otherwise, it is called \textbf{closed}.
 \end{definition}
 
-For example, object $a$ in \ref{met:app} corresponds to a point in a two-dimensional space with coordinates $x = 1$, $ y = 2$. The objects $1$ and $2$ can be defined in terms of $\varphi$-calculus, however the definition itself is out of the scope of this thesis.
+For example, object $a$ in \ref{met:app} corresponds to a point in a two-dimensional space with coordinates $x = 1$, $y = 2$. The objects $1$ and $2$ can be defined in terms of $\varphi$-calculus, however the definition itself is out of the scope of this thesis.
 
 \begin{align}
     point := \mkObject{x \mapsto \mkObject{}, y \mapsto \mkObject} \\
@@ -54,7 +54,7 @@ The expression $x.a$ would be reduced to the value of object $c$. This happens b
 $\rho$ can be used to define attributes of inner objects in terms of attributes of outer objects, or even outer objects themselves.
 
 \subsection{$\varphi$-attribute}
-Objects can define a special attribute with name $\varphi$. This attribute redirects attribute access to its value when the enclosing object does not have an attribute with such a name (\ref{met:phi}).
+Objects can define a special attribute with name $\varphi$. This attribute redirects attribute access to its value when the enclosing object does not have an attribute with such a name (fig. \ref{met:phi}).
 
 \begin{align}
     \label{met:phi}
@@ -83,20 +83,19 @@ Tying everything together, figure \ref{fig:fibo} shows how $\varphi$-calculus ca
 
 \section{EO}
 \label{met:eo}
-EOLANG, or simply EO, is a programming language created by Bugayenko \cite{eolang} which is a direct implementation of $\varphi$-calculus with some extensions. However, their implementation contains features that are irrelevant to the scope of this thesis. Moreover, there is a notable difference between Bugayenko version of EO and $\phi$-calculus by \cite{kudasov} in the definition of locators (or "parent objects"). In the work by Bugayenko locators are \textit{attributes}, whereas in \cite{kudasov} they are \textit{objects}. Consequently, in this thesis, similarly to the $\varphi$-calculus, we are going to use a different version of EO which is a direct translation of the calculus defined in \ref{met:phicalc}.
+EOLANG, or simply EO, is a programming language created by Bugayenko \cite{eolang} which is a direct implementation of $\varphi$-calculus with some extensions. However, their implementation contains features that are irrelevant to the scope of this thesis. Moreover, there is a notable difference between Bugayenko version of EO and $\phi$-calculus by \cite{kudasov} in the definition of locators (or "parent objects"). In the work by Bugayenko locators are \textit{attributes}, whereas in \cite{kudasov} they are \textit{objects}. Consequently, in this thesis, similarly to the $\varphi$-calculus, we are going to use a different version of EO which is a direct translation of the calculus defined in \ref{met:phicalc}. The table of translation is shown in figure \ref{fig:phitoeo}.
 
 \input{figs/phitoeo}
 
 \section{Describing object-oriented programs with EO}
 \label{met:encoding}
-Before analyzing programs written in object-oriented programming languages, it is necessary to translate them into EO while preserving the semantics of the original language. This chapter presents a version of such an encoding that is assumed by analyzers described in this thesis.
+Before analyzing programs written in object-oriented programming languages, it is necessary to translate them into EO while preserving the semantics of the original language. This chapter presents a simplified version of such an encoding that is assumed by analyzers described in this thesis.
 
 \subsection{Classes}
-Classes are modelled as EO objects that do not take any parameters. Class-level (i.e. "static") attributes become attributes of the class object. Constructor is represented by an attribute-object "new" of the class object. This object may take parameters to produce an instance of the object.
+Classes are modelled as closed EO objects. Class-level (i.e. "static") attributes become attributes of the class object. Constructor is represented by an attribute-object "new" of the class object. This object may take parameters to produce an instance of the object.
 
 All instance attributes and methods are defined inside the object returned by the "new" object. Inheritance is modelled as decoration in EO. So, a full example of EO translation would look like this. Class instances (a.k.a objects in Java) are created
-by instantiating the "new" object with the required parameters.
-
+by applying the "new" object to the required parameters.
 
 \subsection{Methods}
 Methods are modelled as EO objects, similarly to classes. These objects can take parameters.
@@ -107,6 +106,74 @@ The return value of the method is represented by the value of the $\varphi$ attr
 
 \section{Detecting Unanticipated Mutual Recursion}
 \label{met:mutualrec}
+\subsection{Problem Statement}
+Unanticipated mutual recursion is a problem that occurs as a result of unconstrained inheritance. Suppose we have an object named Base with two methods - $f$ and $g$. Method $g$ calls method $f$, whereas $f$ does not.
+
+
+Then, there is a class called Derived that extends Base and redefines the method $f$ in a way that it calls $g$. When we call a method $f$ on an instance of Derived, we get a stack overflow error: method $f$ calls method $g$, method $g$ calls method $f$ and so on (figure \ref{fig:mutualrec_basic}).
+
+It is important to note that we are not interested in detecting mutual recursion between the two methods of the same class. We are only interested the cases where mutual recursion occurs as a result of redefining one of the methods of the superclass. The example in fig. \ref{fig:oddeven} shows the class with two mutually-recursive methods "isOdd" and "isEven". In this case the recursion is anticipated and necessary, so it is not a defect.
+
+\begin{figure}
+    \centering
+    \begin{subfigure}{0.4\textwidth}
+        \lstinputlisting[language=Java]{code/mutualrec.java}
+        \caption{Java}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.4\textwidth}
+        \lstinputlisting{code/mutualrec.eo}
+        \caption{EO}
+    \end{subfigure}
+    \caption{Example of unanticipated mutual recursion}
+    \label{fig:mutualrec_basic}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \begin{subfigure}{0.4\textwidth}
+        \lstinputlisting[language=Java]{code/NumericOps.java}
+        \caption{Java}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.4\textwidth}
+        \lstinputlisting{code/numeric_ops.eo}
+        \caption{EO}
+    \end{subfigure}
+    \caption{Example without unanticipated mutual recursion.}
+    \label{fig:oddeven}
+\end{figure}
+
+\subsection{Proposed solution}
+The solution to the problem lies in detecting the cycles in the call-graphs of all the objects. For each class-object in the program, do the following:
+\begin{enumerate}
+    \item Detect the decorated class-object, all methods, and for each method in the class detect all the methods it calls. If the method that is called exists in the class-object, mark it as \textit{resolved}. Otherwise, mark it as \textit{partially-resolved}. The set of mappings between the methods of the class and the methods that each of the methods calls is considered a \textit{partial call-graph} of the object.
+    \item After that the tree is traversed again to convert all the partially-resolved calls to fully resolved calls. To do that we need to calculate the \textit{complete call-graph} of the object, which contains the methods from the object itself, as well as the methods from the decorated object. This is done by \textit{extending} the partial call-graph of the decorated object with the partial call-graph of the decorating objects. Hereinafter we use the terms \textbf{child} and \textbf{parent} to refer to the decorating object and the decorated object respectively. The extension procedure is defined as follows: 
+    \begin{enumerate}
+        \item if the method is present in the parent call-graph, but is absent in the child call-graph, it is left as is. 
+        \item if the method is present in the child call-graph but does not exist in the parent call-graph, it is added to the parent call-graph.
+        \item if the method is present both in the child call-graph and the parent call-graph, all the occurrences of the method in the parent call-graph are replaced by the child's version of the method.
+    \end{enumerate} 
+    \item After the object's call-graph is resolved, perform the depth-first search \cite{dfs} to find the cycles in the complete call-graph. After all the cycles are found, exclude the cycles that contain only the methods from the same object. 
+\end{enumerate}
 
 \section{Detecting Unjustified Assumption in Subclass}
 \label{met:unjustified}
+This defect is described in \cite[Section 3.3]{fragilebaseclass}. This defect occurs when the superclass is refactored by \textit{inlining} the calls to the method that can be redefined by the subclass. The term inlining refers to replacing the method call with its body. Consider the example in fig. \ref{fig:unjustified_before}. Class $M$ extends class $C$, redefining method $l$ to weaken its precondition. Consequently, the precondition in method $m$ of class $M$ is also weakened, because it relies on calling the method $l$. 
+
+Now, suppose that class $C$ comes from some external library, 
+
+\begin{figure}
+    \centering
+    \begin{subfigure}{0.4\textwidth}
+        \lstinputlisting[language=Java]{code/Unjustified.java}
+        \caption{Java}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.4\textwidth}
+        \lstinputlisting{code/unjustified.eo}
+        \caption{EO}
+    \end{subfigure}
+    \caption{Example of unjustified assumption in subclass (before revision)}
+    \label{fig:unjustified_before}
+\end{figure}

@@ -39,26 +39,6 @@ Before running on
 
 
 \subsection{Unanticipated Mutual Recursion}
-Mutual recursion analysis deals with the following problem: suppose we have an object named Base with two methods - $f$ and $g$. Method $g$ calls method $f$, whereas $f$ does something else.
-
-
-Then, there is a class called Derived that extends Base and redefines the method $f$ in a way that it calls $g$. When we call a method $f$ on an instance of Derived, we get a stack overflow error: method $f$ calls method $g$, method $g$ calls method $f$ and so on (figure \ref{fig:mutualrec_basic}).
-
-
-\begin{figure}
-    \centering
-    \begin{subfigure}{0.4\textwidth}
-        \lstinputlisting[language=Java]{code/mutualrec.java}
-        \caption{Java}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}{0.4\textwidth}
-        \lstinputlisting{code/mutualrec.eo}
-        \caption{EO}
-    \end{subfigure}
-    \caption{Example of unanticipated mutual recursion}
-    \label{fig:mutualrec_basic}
-\end{figure}
 
 \subsection{Unjustified Assumption Analysis}
 

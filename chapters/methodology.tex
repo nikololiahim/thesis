@@ -159,9 +159,9 @@ The solution to the problem lies in detecting the cycles in the call-graphs of a
 
 \section{Detecting Unjustified Assumption in Subclass}
 \label{met:unjustified}
-This defect is described in \cite[Section 3.3]{fragilebaseclass}. This defect occurs when the superclass is refactored by \textit{inlining} the calls to the method that can be redefined by the subclass. The term inlining refers to replacing the method call with its body. Consider the example in fig. \ref{fig:unjustified_before}. Class $M$ extends class $C$, redefining method $l$ to weaken its precondition. Consequently, the precondition in method $m$ of class $M$ is also weakened, because it relies on calling the method $l$. 
+This defect \cite[Section 3.3]{fragilebaseclass} occurs when the superclass is refactored by \textit{inlining} the calls to the method that can be redefined by the subclass. The term inlining refers to replacing the method call with its body. Consider an example \pic{fig:unjustified_before}. Class $M$ extends class $C$, redefining method $l$ to weaken its precondition. Consequently, the precondition in method $m$ of class $M$ is also weakened, because it relies on calling the method $l$. 
 
-Now, suppose that class $C$ comes from some external library, 
+Now, suppose that class $C$ comes from some external library, and class $M$ is defined in the user code. Library maintainer decides to refactor class $C$ by inlining the call to $l$ in method $m$ \pic{fig:unjustified_after}. Observe what happens to the class $M$. Now that $m$ in class base has an assert, the redefinition of method $n$ in class $M$ has its precondition strengthened as compared to its version in class $C$. Therefore, the seemingly safe refactoring in base class broke the invariants in the subclasses. The name of the defect come from the fact that the subclass $M$ \textit{assumed} that the method $m$ should be implemented in terms of method $l$. The above example shows that such an assumption is indeed not justified, and the maintainers of class $C$ can change it as they seem fit.
 
 \begin{figure}
     \centering
@@ -176,4 +176,19 @@ Now, suppose that class $C$ comes from some external library,
     \end{subfigure}
     \caption{Example of unjustified assumption in subclass (before revision)}
     \label{fig:unjustified_before}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \begin{subfigure}{0.4\textwidth}
+        \lstinputlisting[language=Java]{code/UnjustifiedRevised.java}
+        \caption{Java}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.4\textwidth}
+        \lstinputlisting{code/unjustified_revised.eo}
+        \caption{EO}
+    \end{subfigure}
+    \caption{Example of unjustified assumption in subclass (after revision)}
+    \label{fig:unjustified_after}
 \end{figure}

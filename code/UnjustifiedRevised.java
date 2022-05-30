@@ -5,7 +5,8 @@ class C {
     }
 
     int m(int v) {
-        return this.l(v);
+        (*@ \colorbox{light-gray}{assert (v < 5);} @*)
+        (*@ \colorbox{light-gray}{return v;}@*)
     }
 
     int n(int v) {

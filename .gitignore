@@ -8,7 +8,6 @@
 **/*.log
 **/*.lot
 **/*.out
-thesis.pdf
 **/*.run.xml
 **/*.synctex.gz
 **/*.toc

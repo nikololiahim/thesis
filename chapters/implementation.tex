@@ -38,7 +38,41 @@ This section describes each of the analysis algorithms in greater detail. First,
 Before running on
 
 
-\subsection{Unanticipated Mutual Recursion}
+\section{Detecting Unanticipated Mutual Recursion}
+\label{impl:mutualrec}
 
-\subsection{Unjustified Assumption Analysis}
+\subsection{Proposed solution}
+The solution to the problem lies in detecting the cycles in the call-graphs of all the objects. For each class-object in the program, do the following:
+\begin{enumerate}
+    \item Detect the decorated class-object, all methods, and for each method in the class detect all the methods it calls. If the method that is called exists in the class-object, mark it as \textit{resolved}. Otherwise, mark it as \textit{partially-resolved}. The set of mappings between the methods of the class and the methods that each of the methods calls is considered a \textit{partial call-graph} of the object.
+    \item After that the tree is traversed again to convert all the partially-resolved calls to fully resolved calls. To do that we need to calculate the \textit{complete call-graph} of the object, which contains the methods from the object itself, as well as the methods from the decorated object. This is done by \textit{extending} the partial call-graph of the decorated object with the partial call-graph of the decorating objects. Hereinafter we use the terms \textbf{child} and \textbf{parent} to refer to the decorating object and the decorated object respectively. The extension procedure is defined as follows: 
+    \begin{enumerate}
+        \item if the method is present in the parent call-graph, but is absent in the child call-graph, it is left as is. 
+        \item if the method is present in the child call-graph but does not exist in the parent call-graph, it is added to the parent call-graph.
+        \item if the method is present both in the child call-graph and the parent call-graph, all the occurrences of the method in the parent call-graph are replaced by the child's version of the method.
+    \end{enumerate} 
+    \item After the object's call-graph is resolved, perform the depth-first search \cite{dfs} to find the cycles in the complete call-graph. After all the cycles are found, exclude the cycles that contain only the methods from the same object. 
+\end{enumerate}
+
+\section{Detecting Unjustified Assumption in Subclass}
+\label{impl:unjustified}
+
+\subsection{Proposed Solution}
+We propose the following approach for detecting the methods where inlining of the calls may lead to breaking changes in subclasses:
+\begin{enumerate}
+    \item An \textit{initial} representation of the program is produced. This representation is a tree-like data structure which preserves the nesting relations between objects. So, the objects which contain other objects are the roots of their respective subtrees, whereas the container objects are the subtrees or leaves.
+    \item We produce a \textit{revision} of the initial program representation where all the calls to the methods are inlined. 
+    \item In both versions, for each of the class-objects, for each method in the class-object, a set of \textit{properties} is inferred.  These properties can be thought of as an implicit contract \cite{meyer} of each method. In addition to the implicit properties, the explicit properties which come in the form of \textit{assert} statements in the source code are also taken into account. In order to infer the properties of the method, partial interpretation of its body is performed. The interpretation is limited to basic numeric operations, numeric and boolean values and method calls. The inference rules are described in greater detail in fig. \ref{fig:props}.
+    \item After all the properties are inferred, the following predicate should hold true for both the initial and the revised versions:
+    \begin{align*}
+        P_{init} \implies P_{rev}
+    \end{align*}
+    If it doesn't hold for some class-object, it means that the revision of one of its superclasses introduces a breaking change, which weakens the precondition of some its methods. 
+\end{enumerate}
+
+\begin{figure}
+    \includegraphics[width=\textwidth]{figs/properties}
+    \caption{Rules for property inference in detection of unjustified assumption in subclass.}
+    \label{fig:props}
+\end{figure}
 

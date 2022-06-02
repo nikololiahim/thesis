@@ -1,10 +1,28 @@
 \chapter{Evaluation and Discussion}
 \label{chap:eval}
-This chapter provides the evaluation of the resulting implementation. Section 5.1 outlines the limitations of the EO-based static analysis. Section 5.2 describes how the analyzers were tested. Finally, section 5.3 describes the result of comparing EO-based static analyzers with their counerparts for other programming languages.
+This chapter provides the evaluation of the resulting implementation. Section \ref{eval:limitations} outlines the limitations of the EO-based static analysis. Section \ref{eval:testing} describes how the analyzers were tested. Finally, section \ref{eval:comparisons} describes the result of comparing EO-based static analyzers with their counerparts for other programming languages.
 
 \section{Limitations}
+\label{eval:limitations}
 
+\subsection{General}
+The analyzer provided minimal information about the location of discovered errors. This is especially important if the analyzer is to be used in the integrated development environments.
+
+The analyzer only works on single files. If EO objects are spread across multiple files, the current implementation would be able to analyze only one file at a time. There is a minimal support for objects imported from other EO files, i.e. analyzer acknowledges their existence and does not report them as missing. However, bodies of object imported from other files can not be accessed, therefore no meaningful analysis can be performed if one of the used objects comes from another file.
+
+\subsection{Unanticipated Mutual Recursion}
+The implementation of does not do any path-dependent analysis, therefore it may produce false-positives in case when the call to the mutually-recursive method is unreachable, e.g. when guarded by a statement which can only be false. 
+
+\subsection{Unjustified Assumption in Subclass}
+The analyzer relies on the external SMT-solver called Princess \cite{princess}. The solver has some limitations when it comes to the support of SMTLIB-2 \cite{smtlib} format. A lot of effort was spent working around the peculiarities of the solver interface. This limits the portability of the implementation if a different SMTLIB backend is to be chosen.
+
+The current implementation of the analyzer supports only a limited set of types. This limitation is directly imposed by the lack of a static type checker in EO. Specifically, all method parameters (excluding \textbf{self}) and their return methods are assumed to be of type integer. This imposes significant limitations on the type of constraints that can be decided by the solver.
+
+Finally, the complexity of the constraints the solver needs to decide grows linearly with the size of the program. While the complexity of the solver operation is largely unknown, it would be wise to estimate that the execution time of the analyzer would be rather slow on the large programs with a lot of constraints.
 
 \section{Testing}
+\label{eval:testing}
+The implementation is largely covered by hand-written tests. For mutual-recursion, the property-based testing technique \cite{property_based_testing} was also applied to ensure the extensive coverage of the input domain.
 
 \section{Comparisons}
+\label{eval:comparisons}

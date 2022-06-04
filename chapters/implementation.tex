@@ -94,7 +94,7 @@ The second type parameter, $M$, is the type used to store the information about 
           selfArgName: String,
           calls: Vector[Call],
           body: EOObj[EOExprOnly],
-          depth: BigInt,
+          depth: Int,
       )
           
       final case class Call(
@@ -116,7 +116,26 @@ The \textit{ObjectInfo}, where $P$ is the name of the parent object and $M$ is \
         ObjectInfo[ParentName, MethodInfo]
     ]
 
-\end{lstlisting} 
+\end{lstlisting}
+
+\section{Complete object tree}
+\label{impl:complete_object_tree}
+The so-called \textit{complete object tree} is defined as the following type alias:
+\begin{lstlisting}
+  type CompleteObjectTree =
+    ObjectTree[
+      ObjectInfo[
+        LinkToParent,
+        MethodInfo
+      ]
+    ]
+\end{lstlisting}
+The only thing that distinguishes it from the \textit{partial object tree} is that the parent name is replaced with the special \textit{LinkToParent} type. This type is also an optic \cite{optics} and is essentially a function of the type:
+\begin{lstlisting}
+    val linkToParent: 
+      CompleteObjectTree => CompleteObjectTree
+\end{lstlisting}
+It takes the whole object tree of the program and returns the object which represents the decorated object of the object where the link is located.
 
 
 
@@ -124,6 +143,7 @@ The \textit{ObjectInfo}, where $P$ is the name of the parent object and $M$ is \
 \label{impl:mutualrec}
 
 \subsection{Proposed solution}
+\label{impl:mutualrec_algo}
 The solution to the problem lies in detecting the cycles in the call-graphs of all the objects. For each class-object in the program, do the following:
 \begin{enumerate}
     \item Detect the decorated class-object, all methods, and for each method in the class detect all the methods it calls. If the method that is called exists in the class-object, mark it as \textit{resolved}. Otherwise, mark it as \textit{partially-resolved}. The set of mappings between the methods of the class and the methods that each of the methods calls is considered a \textit{partial call-graph} of the object.
@@ -135,6 +155,20 @@ The solution to the problem lies in detecting the cycles in the call-graphs of a
           \end{enumerate}
     \item After the object's call-graph is resolved, perform the depth-first search \cite{dfs} to find the cycles in the complete call-graph. After all the cycles are found, exclude the cycles that contain only the methods from the same object.
 \end{enumerate}
+
+\subsection{Implementation}
+The first step of the algorithm in \ref{impl:mutualrec_algo} is covered by converting the EO code into a \textit{complete object tree}. Then the object tree is converted into a variation of the object tree where all the calls are resolved. This variation is called \textit{ObjectTreeWithResolvedCallgraphs} \pic{fig:mutualrec_program}. For each object, only its fully resolved call-graph is stored. The final step traverses the tree and collects all the cycles in a list of special objects of type \textit{CallChain}. This object represents the sequence of fully-qualified method names that when called would never terminate. Finally, each of such call chains are presented to the user in the form of human-readable strings. 
+
+\begin{figure}
+    \begin{lstlisting}[language=Scala]
+        type ResolvedCallGraph = 
+          Map[Methodname, Set[MethodName]]
+        type ObjectTreeWithResolvedCallgraphs =
+          ObjectTree[ResolvedCallGraph]
+    \end{lstlisting}
+    \caption{\textit{ObjectTreeWithResolvedCallgraphs}.}
+    \label{fig:mutualrec_program}
+\end{figure}
 
 \section{Detecting Unjustified Assumption in Subclass}
 \label{impl:unjustified}

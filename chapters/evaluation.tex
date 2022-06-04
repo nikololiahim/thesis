@@ -13,6 +13,18 @@ The analyzer only works on single files. If EO objects are spread across multipl
 \subsection{Unanticipated Mutual Recursion}
 The implementation of does not do any path-dependent analysis, therefore it may produce false-positives in case when the call to the mutually-recursive method is unreachable, e.g. when guarded by a statement which can only be false.
 
+The current implementation of the mutual recursion analyzer also contains a bug which causes it to crash with a stack overflow exception when the program contains a cycle in the inheritance chains. The presence of the inheritance chain means that there is such a class-object that extends an object which directly or indirectly extends the first object. 
+
+\begin{figure}
+  \begin{center}
+    \begin{tabular}{c}  
+  \lstinputlisting{code/inheritance_chain.eo}
+    \end{tabular}
+  \end{center}
+  \caption{A simple example of the cycle in the inheritance chain. Object $a$ extends $b$, which in turn extends object $a$.}
+  \label{fig:inheritance_chain}
+\end{figure}
+
 \subsection{Unjustified Assumption in Subclass}
 The analyzer relies on the external SMT-solver called Princess \cite{princess}. The solver has some limitations when it comes to the support of SMTLIB-2 \cite{smtlib} format. A lot of effort was spent working around the peculiarities of the solver interface. This limits the portability of the implementation if a different SMTLIB backend is to be chosen.
 
@@ -63,7 +75,22 @@ def runTests(tests: List[TestCase]): Unit =
 \end{lstlisting}
 
 \subsection{Property-based Testing}
-Property-based testing is a variation of random testing that can be used when there exists a set of well-defined properties (or predicates) that should be satisfied for a set of possible inputs of the function being tested.  This predicate is then being evaluated on the randomly generated input data. The key difference between property-based testing and the conventional testing approach, like the one described in \ref{eval:integration_testing}, is the fact that fact that the random input data is generated \textit{automatically}, which covers a large effective subset of the input domain that would otherwise be impractical or impossible to perform manually. 
+Property-based testing is a variation of random testing that can be used when there exists a set of well-defined properties (or predicates) that should be satisfied for a set of possible inputs of the function being tested.  This predicate is then being evaluated on the randomly generated input data. The key difference between property-based testing and the conventional testing approach, like the one described in \ref{eval:integration_testing}, is the fact that the random input data is generated \textit{automatically}, which covers a large effective subset of the input domain that would otherwise be impractical or impossible to perform manually.
+
+We decided to apply this approach to testing the mutual recursion analyzer as follows:
+\begin{enumerate}
+  \item 1. Create a generator that randomly generates the instances of \textit{ObjectTreeWithResolvedCallgraphs} \pic{fig:mutualrec_program}. The generation process keeps only those trees that contain the multiobject recursion cycles. These cycles are stored as \textit{CallChain} objects and captured as expected output. 
+  \item These trees are converted into string with the respective EO code by a simple pretty-printer.
+  \item The analyzer is then run on the generated strings to obtain the \textit{CallChain} objects. The obtained objects are then compared with the ones before pretty-printing. 
+\end{enumerate}
+
+So, the property that we are trying to test can be summarised as follows: 
+
+\begin{definition}
+  The cycles found in the randomly-generated \textit{ObjectTreeWithResolvedCallgraphs} should be the same as the ones found by the analyzer which was given the pretty-printed version of said \textit{ObjectTreeWithResolvedCallgraphs}.
+\end{definition}
+
+The current version of the CI pipeline for the repository runs 1000 such randomly generated tests per run. 
 
 \section{Comparisons}
 \label{eval:comparisons}

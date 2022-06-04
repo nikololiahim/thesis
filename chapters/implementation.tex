@@ -24,18 +24,100 @@ Odin is a project consisting of multiple modules. The main modules are:
     \item Backends, which contains algorithms that transform EO AST into something else. The only backend so far is a plain text backend: it transforms EO AST into its syntactically correct equivalent in EO source code. This backend can also be interpreted as a pretty-printer of EO code and is widely used as such in other modules.
     \item Parser, which contains a parser (also known as a syntactic analyzer) of EO source code. It is used to convert different EO representations (e.g. plain text or XML encoding) into the EO AST defined in Core module.
 \end{itemize}
-\section{Parser}
-The parser used in Odin implements a slightly altered version of EO specification defined by Bugayenko \cite{eolang}. In particular, it relaxes constraints on whitespace between tokens and the number of newlines and comments between definitions. This is done to reduce the complexity of producing source code pieces for testing and debugging.
 
+\section{Data Structures}
+\subsection{EO Syntax Tree}
+This is a data structure that is used to model the syntactic structure of EO which is used as a starting point for the extraction of more high-level concepts, such as class-objects, method-objects and method calls. It describes EO following the syntax specification from the paper by Bugayenko \cite{eolang}, with slight deviations to account for the specifics of the underlying refined $\varphi$-calculus described in \cite{kudasov}. 
 
-The parser was created using \textbf{cats-parse} library \footnote{\url{https://github.com/typelevel/cats-parse}} for Scala. It provides a parser-combinator \cite{hill_combinators_1996} approach to building recursive-descent parsers. Recursive-descent parsers are known for their worst-case exponential complexity. This problem can not be avoided in general. However, cats-parse mitigates it by explicitly marking all the places in the parser definition that can cause such spikes in complexity.
+In order to create the parser from the EO code to EO syntax tree we used \textbf{cats-parse} \footnote{\url{https://github.com/typelevel/cats-parse}}, a monadic parser combinator \cite{hill_combinators_1996}  library for Scala.
 
-\section{Analyses}
-This section describes each of the analysis algorithms in greater detail. First, we will describe the steps that are performed prior to each of the defect-specific analyses: parsing and detecting the significant features of EO programs - objects, methods and extension clauses. Then we will describe the algorithms for detecting each of the covered defects: unanticipated mutual recursion and unjustified assumption in subclass. Finally, we will conclude the chapter by describing the shortcomings of each of the algorithms.
+EO syntax tree is an immutable polymorphic data structure defined \textit{à la carte} \cite{alacarte} \pic{fig:ast}. 
+Since the tree is immutable, it can only be altered by constructing the new version, where the old parts of the tree are replaced with new ones. The transformations that construct these new versions of the data structure are known as \textit{optics} \cite{optics}. We used the \textit{monocle} \footnote{\url{https://www.optics.dev/Monocle/}} library for Scala to simplify the generation of the optics that modify the EO syntax tree.  
 
+\begin{figure}
+    \lstinputlisting[language=Scala]{code/ast.scala}
+    \caption{EO syntax tree definitions (abridged).}
+    \label{fig:ast}
+\end{figure}
+\subsection{Object Tree}
+Object Tree is a data strcuture that captures the relationships between objects in an EO program. It is a refinenement of the EO syntax tree, which contains the elements of an EO program relevant to subsequent analysis steps: class-objects, method-objects, extension clauses and method calls. 
 
-\subsection{Preprocessing}
-Before running on
+EO object tree is also a recursively-defined polymorphic data structure \pic{fig:objtree}. The type parameter $A$ represents the information that is stored for each object in the tree. This information is stored in \textit{info} field of the tree. The field called \textit{nestedObjs} is stores the information about all the nested class-objects. Nested objects are the class-objects that are defined as the attributes of other class objects, just like nested classes in Java. The information about one of the nested objects can be accessed by the key which is of type \textit{Name}. This name identifies the object uniquely because the object can not contain two attributes with the same name.  
+
+\begin{figure}
+    \begin{lstlisting}
+        final case class ObjectTree[A](
+          info: A,
+          nestedObjs: Map[Name, ObjectTree[A]]
+        ) 
+    \end{lstlisting}
+    \caption{Object tree}
+    \label{fig:objtree}
+\end{figure}
+
+\subsection{ObjectInfo}
+
+The first and the most generally-applicable type we use in place of type parameter $A$  is \textit{ObjectInfo} \pic{fig:objinfo}. This type also has two type parameters. The first one, $P$, is responsible for holding the information about the decorated object (or simply parent). The first traversal can only gather the name of the decorated object. 
+
+The second type parameter, $M$, is the type used to store the information about each of the methods. The information captured during the first traversal of EO syntax tree \pic{fig:methodinfo} can be summarised as follows:
+\begin{itemize}
+    \item \textit{selfArgName} - the name of the free attribute of the method object that is used to capture the calling object. 
+    \item \textit{body} - the EO syntax tree node that hold the body of the method. 
+    \item \textit{depth} - how deeply the method object is nested in an EO program. For toplevel objects this attribute is $0$. For method objects (that are always defined in the class-objects), this attribute is equal to the depth of the class-object plus one.  
+    \item \textit{calls} - a sequence of method calls in the method definition. The \textit{Call} type stores all the necessary information to identify and traverse all the call within the method body:
+    \begin{itemize}
+        \item depth - depth of the object where the call is located. This value is equal to the depth of the method-object + the relative depth of the method-local object containing the call.
+        \item \textit{methodName} - a simple name of the method-object where the call is located.
+        \item \textit{callSite} - an optic \cite{optics} which extracts the location of the method-local object where the call is located. 
+        \item \textit{callLocation} - an optic \cite{optics} that extracts the location of the EO syntax tree node that defines the method call. 
+        \item \textit{args} - the EO syntax tree nodes, which correspond to the arguments of the call, including the \textbf{self} argument.  
+    \end{itemize}  
+\end{itemize}
+
+\begin{figure}
+    \begin{lstlisting}[language=Scala]
+      final case class ObjectInfo[P, M](
+        name: Name,
+        fqn: FQName,
+        depth: Int,
+        parentInfo: Option[P],
+        methods: Map[Name, M],
+      )
+    \end{lstlisting}
+    \caption{ObjectInfo}
+    \label{fig:objinfo}
+\end{figure}
+
+\begin{figure}
+    \begin{lstlisting}[language=Scala]
+      final case class MethodInfo(
+          selfArgName: String,
+          calls: Vector[Call],
+          body: EOObj[EOExprOnly],
+          depth: BigInt,
+      )
+          
+      final case class Call(
+        depth: BigInt,
+        methodName: String,
+        callSite: PathToCallSite,
+        callLocation: PathToCall,
+        args: NonEmptyVector[EOBnd[EOExprOnly]]
+      )
+    \end{lstlisting}
+    \caption{MethodInfo and Call}
+    \label{fig:methodinfo}
+\end{figure}
+
+\section{Partial object tree}
+The \textit{ObjectInfo}, where $P$ is the name of the parent object and $M$ is \textit{MethodInfo} can be called the \textit{partial object tree}:
+\begin{lstlisting}
+    type PartialObjectTree = ObjectTree[
+        ObjectInfo[ParentName, MethodInfo]
+    ]
+
+\end{lstlisting} 
+
 
 
 \section{Detecting Unanticipated Mutual Recursion}
@@ -45,13 +127,13 @@ Before running on
 The solution to the problem lies in detecting the cycles in the call-graphs of all the objects. For each class-object in the program, do the following:
 \begin{enumerate}
     \item Detect the decorated class-object, all methods, and for each method in the class detect all the methods it calls. If the method that is called exists in the class-object, mark it as \textit{resolved}. Otherwise, mark it as \textit{partially-resolved}. The set of mappings between the methods of the class and the methods that each of the methods calls is considered a \textit{partial call-graph} of the object.
-    \item After that the tree is traversed again to convert all the partially-resolved calls to fully resolved calls. To do that we need to calculate the \textit{complete call-graph} of the object, which contains the methods from the object itself, as well as the methods from the decorated object. This is done by \textit{extending} the partial call-graph of the decorated object with the partial call-graph of the decorating objects. Hereinafter we use the terms \textbf{child} and \textbf{parent} to refer to the decorating object and the decorated object respectively. The extension procedure is defined as follows: 
-    \begin{enumerate}
-        \item if the method is present in the parent call-graph, but is absent in the child call-graph, it is left as is. 
-        \item if the method is present in the child call-graph but does not exist in the parent call-graph, it is added to the parent call-graph.
-        \item if the method is present both in the child call-graph and the parent call-graph, all the occurrences of the method in the parent call-graph are replaced by the child's version of the method.
-    \end{enumerate} 
-    \item After the object's call-graph is resolved, perform the depth-first search \cite{dfs} to find the cycles in the complete call-graph. After all the cycles are found, exclude the cycles that contain only the methods from the same object. 
+    \item After that the tree is traversed again to convert all the partially-resolved calls to fully resolved calls. To do that we need to calculate the \textit{complete call-graph} of the object, which contains the methods from the object itself, as well as the methods from the decorated object. This is done by \textit{extending} the partial call-graph of the decorated object with the partial call-graph of the decorating objects. Hereinafter we use the terms \textbf{child} and \textbf{parent} to refer to the decorating object and the decorated object respectively. The extension procedure is defined as follows:
+          \begin{enumerate}
+              \item if the method is present in the parent call-graph, but is absent in the child call-graph, it is left as is.
+              \item if the method is present in the child call-graph but does not exist in the parent call-graph, it is added to the parent call-graph.
+              \item if the method is present both in the child call-graph and the parent call-graph, all the occurrences of the method in the parent call-graph are replaced by the child's version of the method.
+          \end{enumerate}
+    \item After the object's call-graph is resolved, perform the depth-first search \cite{dfs} to find the cycles in the complete call-graph. After all the cycles are found, exclude the cycles that contain only the methods from the same object.
 \end{enumerate}
 
 \section{Detecting Unjustified Assumption in Subclass}
@@ -61,13 +143,13 @@ The solution to the problem lies in detecting the cycles in the call-graphs of a
 We propose the following approach for detecting the methods where inlining of the calls may lead to breaking changes in subclasses:
 \begin{enumerate}
     \item An \textit{initial} representation of the program is produced. This representation is a tree-like data structure which preserves the nesting relations between objects. So, the objects which contain other objects are the roots of their respective subtrees, whereas the container objects are the subtrees or leaves.
-    \item We produce a \textit{revision} of the initial program representation where all the calls to the methods are inlined. 
+    \item We produce a \textit{revision} of the initial program representation where all the calls to the methods are inlined.
     \item In both versions, for each of the class-objects, for each method in the class-object, a set of \textit{properties} is inferred.  These properties can be thought of as an implicit contract \cite{meyer} of each method. In addition to the implicit properties, the explicit properties which come in the form of \textit{assert} statements in the source code are also taken into account. In order to infer the properties of the method, partial interpretation of its body is performed. The interpretation is limited to basic numeric operations, numeric and boolean values and method calls. The inference rules are described in greater detail in fig. \ref{fig:props}.
     \item After all the properties are inferred, the following predicate should hold true for both the initial and the revised versions:
-    \begin{align*}
-        P_{init} \implies P_{rev}
-    \end{align*}
-    If it doesn't hold for some class-object, it means that the revision of one of its superclasses introduces a breaking change, which weakens the precondition of some its methods. 
+          \begin{align*}
+              P_{init} \implies P_{rev}
+          \end{align*}
+          If it doesn't hold for some class-object, it means that the revision of one of its superclasses introduces a breaking change, which weakens the precondition of some its methods.
 \end{enumerate}
 
 \begin{figure}

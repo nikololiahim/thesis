@@ -34,5 +34,8 @@
         "**/*.toc": true,
         "**/*.xdv": true,
     },
-    "editor.wordWrap": "on"
+    "editor.wordWrap": "on",
+    "files.watcherExclude": {
+        "**/target": true
+    }
 }

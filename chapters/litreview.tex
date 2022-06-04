@@ -1,10 +1,6 @@
 \chapter{Literature Review}
 \label{chap:lr}
 \chaptermark{Second Chapter Heading}
-Static analysis of object-oriented programs is a well-studied area. However, most of the effort in these studies was focused on analysing specific languages.
-
-One of these areas is the . This area is crucial for this thesis, because it motivates the existence of the tool we are trying to create. Another area of interest may be "attempts to establish a formal foundation for object-oriented languages". This is the area where we may find how EO intersects with other similar works in the area and what sets it apart.
-
 This chapter presents oveview of the theoretical concepts that the implementation relies on. Section \ref{lit:phicalc} briefly describes the relevant parts of $\varphi$-calculus: its syntax and semantics. Section \ref{lit:eo} explains how $\varphi$-calculus maps to EO, the intermediate representation the analyzers operate on. Section \ref{lit:encoding} shows how to encode basic object-oriented constructs (classes, methods, inheritance) by means of EO. 
 
 \section{Navigation}
@@ -92,7 +88,7 @@ Tying everything together, figure \ref{fig:fibo} shows how $\varphi$-calculus ca
 
 \section{EO}
 \label{lit:eo}
-EOLANG, or simply EO, is a programming language created by Bugayenko \cite{eolang} which is a direct implementation of $\varphi$-calculus with some extensions. However, their implementation contains features that are irrelevant to the scope of this thesis. Moreover, there is a notable difference between Bugayenko version of EO and $\phi$-calculus by \cite{kudasov} in the definition of locators (or "parent objects"). In the work by Bugayenko locators are \textit{attributes}, whereas in \cite{kudasov} they are \textit{objects}. Consequently, in this thesis, similarly to the $\varphi$-calculus, we are going to use a different version of EO which is a direct translation of the calculus defined in \ref{lit:phicalc}. The table of translation is shown in figure \ref{fig:phitoeo}.
+EOLANG, or simply EO, is a programming language created by Bugayenko \cite{eolang} which is a direct implementation of $\varphi$-calculus with some extensions. However, their implementation contains features that are irrelevant to the scope of this thesis. Moreover, there is a notable difference between Bugayenko version of EO and $\phi$-calculus by \cite{kudasov} in the definition of locators (or "parent objects"). In the work by Bugayenko locators are \textit{attributes}, whereas in \cite{kudasov} they are \textit{objects}. In this thesis, similarly to the $\varphi$-calculus, we are going to use a different version of EO which is a direct translation of the calculus defined in \ref{lit:phicalc}. The table of translation is shown in figure \ref{fig:phitoeo}.
 
 \input{figs/phitoeo}
 

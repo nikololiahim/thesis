@@ -6,11 +6,11 @@
 
 \label{sec:section}
 Object-oriented programming languages have been adopted widely over the past two decades.
-As of March 2022, the top five positions of the TIOBE index are occupied by Python, C, Java, C++ and C\#.
+As of March 2022, the top five positions of the TIOBE index \footnote{\url{https://www.tiobe.com/tiobe-index/}} are occupied by Python, C, Java, C++ and C\#.
 Four of these languages (with the exception of C) are considered object-oriented and, as the index suggests,
 are widely adopted and used in large-scale commercial products.
 
-\section{Properties of Object-Oriented Programming Languages}
+\section{Object Oriented Programming Languages}
 According to \cite{oop1}, \textit{object-oriented} programming languages are the languages where the main unit of abstraction is an \textit{object}.
 Objects encapsulate \textit{data}, which are the values of some type.
 Some languages, e.g. Java and C++, distinguish between \textit{primitive types},
@@ -36,7 +36,7 @@ To mitigate this complexity and enforce good practices, developers have created 
 
 \textbf{Dynamic} analyzers (also known as \textit{profilers}) inspect the state of the program as it is being executed. Dynamic analyzers collect important information about the program execution, such as CPU utilization and memory consumption and present it in the human-readable form. This information is crucial in applications where the performance plays an important role. Unfortunately, the tools require the program under analysis to be executed, which can be expensive or even impossible, e.g. when the program is to be run on dedicated hardware.
 
-On the contrary, \textbf{static} analyzers inspect the source code of the program (or one of its intermediate representations) \textit{without executing it} to locate common errors, anti-patterns and deviations from the accepted style conventions. Executing such tools isn't usually time-consuming or otherwise expensive, which is why they are a crucial part of continuous integration (CI) pipelines and integrated development environments (IDEs).
+On the contrary, \textbf{static} analyzers inspect the source code of the program (or one of its intermediate representations) \textit{without executing it} to locate common errors, anti-patterns and deviations from the accepted style conventions. Executing such tools isn't usually time-consuming or otherwise expensive, which is why they are a crucial part of continuous integration \cite{ci} pipelines and integrated development environments (IDEs).
 Despite being prone to false positives, static analysis tools can pinpoint the location of the error with greater precision.
 
 Unlike dynamic analyzers, static analyzers operate on the source code, which allows them to inspect the program from a higher-level perspective. This means that static analyzers can improve the error reporting of programming language compilers, discover more problems, and  even automatically fix them.

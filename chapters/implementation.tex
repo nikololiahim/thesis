@@ -1,31 +1,10 @@
 \chapter{Implementation}
 \label{chap:impl}
-This chapter analyzes specifics of Odin (short for Object Dependency INspector) - a static analyzer of EO source code. Section 4.1 covers the tools and technologies used in the project. Section 4.2 gives a brief overview of the project file structure.
-Section 4.3 goes over the implementation of EO parser used in the project. Section 4.4 discusses the ways we can represent the elements of object-oriented programs in EO. Sections 4.5 and 4.6 describe the implementations of the analysis algorithms applied to structured EO code. Finally, section 4.7 summarizes this chapter.
-
-\section{Development Environment}
-Odin is a project written entirely in \textbf{Scala} \footnote{\url{https://www.scala-lang.org/}} - a modern programming language with support for high-level concepts such as structural pattern matching \cite{pattern_matching} and algebraic data types \cite{adts}. Scala is compiled into Java Virtual Machine (JVM) byte code. This allows Odin to be used as a library in any other project compatible with JVM, be it Scala or Java. In addition, programs compiled to JVM byte code can be run without changes on any device that can run Java Virtual Machine.
-
-
-The project uses a build tool called \textbf{sbt} \footnote{\url{https://www.scala-sbt.org/}}, which allows compiling multiple Scala modules at once. A distinctive feature of \textbf{sbt} is the ability to cross-compile Scala code so that it is compatible with many versions of Scala and Java. It also supports a variety of plugins that improve the development process. The plugins used by Odin are \textbf{scalafmt} \footnote{\url{https://scalameta.org/scalafmt/}}, an automatic source code formatter, and \textbf{scalafix} \footnote{\url{https://scalacenter.github.io/scalafix/}} , a linter and code analyzer with support for project-wide refactorings.
-
-Odin is published as a \textbf{JAR} \footnote{\url{https://docs.oracle.com/javase/7/docs/technotes/guides/jar/jar.html}} and can be downloaded from the \textbf{Maven Central} repository \footnote{\url{https://search.maven.org/search?q=g:org.polystat.odin}}.
-
-The source code of the project is available on \textbf{Github} \footnote{\url{https://github.com/polystat/odin}}. It also provides the instructions on how to launch and contribute to the project.
-
-
-
-\section{Module Structure}
-Odin is a project consisting of multiple modules. The main modules are:
-\begin{itemize}
-    \item Core, which contains the definition for EO AST (Abstract Syntax Tree).
-          This AST is used as an input to all analysis algorithms.
-    \item Analyses, which contains the implementations of various analyzers.
-    \item Backends, which contains algorithms that transform EO AST into something else. The only backend so far is a plain text backend: it transforms EO AST into its syntactically correct equivalent in EO source code. This backend can also be interpreted as a pretty-printer of EO code and is widely used as such in other modules.
-    \item Parser, which contains a parser (also known as a syntactic analyzer) of EO source code. It is used to convert different EO representations (e.g. plain text or XML encoding) into the EO AST defined in Core module.
-\end{itemize}
+This chapter gives the detailed description of the implementation of the analyzers of EO intermediate representation. Section \ref{impl:data_structures} desribes the common data structures used by the analyzers. Sections \ref{impl:mutualrec} and \ref{impl:unjustified} describe the analysis algorithms and their implementations.
 
 \section{Data Structures}
+\label{impl:data_structures}
+
 \subsection{EO Syntax Tree}
 This is a data structure that is used to model the syntactic structure of EO which is used as a starting point for the extraction of more high-level concepts, such as class-objects, method-objects and method calls. It describes EO following the syntax specification from the paper by Bugayenko \cite{eolang}, with slight deviations to account for the specifics of the underlying refined $\varphi$-calculus described in \cite{kudasov}. 
 
@@ -109,7 +88,7 @@ The second type parameter, $M$, is the type used to store the information about 
     \label{fig:methodinfo}
 \end{figure}
 
-\section{Partial object tree}
+\subsection{Partial object tree}
 The \textit{ObjectInfo}, where $P$ is the name of the parent object and $M$ is \textit{MethodInfo} can be called the \textit{partial object tree}:
 \begin{lstlisting}
     type PartialObjectTree = ObjectTree[
@@ -118,10 +97,10 @@ The \textit{ObjectInfo}, where $P$ is the name of the parent object and $M$ is \
 
 \end{lstlisting}
 
-\section{Complete object tree}
+\subsection{Complete object tree}
 \label{impl:complete_object_tree}
 The so-called \textit{complete object tree} is defined as the following type alias:
-\begin{lstlisting}
+\begin{lstlisting}[language=Scala]
   type CompleteObjectTree =
     ObjectTree[
       ObjectInfo[
@@ -131,7 +110,7 @@ The so-called \textit{complete object tree} is defined as the following type ali
     ]
 \end{lstlisting}
 The only thing that distinguishes it from the \textit{partial object tree} is that the parent name is replaced with the special \textit{LinkToParent} type. This type is also an optic \cite{optics} and is essentially a function of the type:
-\begin{lstlisting}
+\begin{lstlisting}[language=Scala]
     val linkToParent: 
       CompleteObjectTree => CompleteObjectTree
 \end{lstlisting}
@@ -157,7 +136,7 @@ The solution to the problem lies in detecting the cycles in the call-graphs of a
 \end{enumerate}
 
 \subsection{Implementation}
-The first step of the algorithm in \ref{impl:mutualrec_algo} is covered by converting the EO code into a \textit{complete object tree}. Then the object tree is converted into a variation of the object tree where all the calls are resolved. This variation is called \textit{ObjectTreeWithResolvedCallgraphs} \pic{fig:mutualrec_program}. For each object, only its fully resolved call-graph is stored. The final step traverses the tree and collects all the cycles in a list of special objects of type \textit{CallChain}. This object represents the sequence of fully-qualified method names that when called would never terminate. Finally, each of such call chains are presented to the user in the form of human-readable strings. 
+The first step of the algorithm in \ref{impl:mutualrec_algo} is covered by converting the EO code into a \textit{complete object tree} (section \ref{impl:complete_object_tree}). Then the object tree is converted into a variation of the object tree where all the calls are resolved. This variation is called \textit{ObjectTreeWithResolvedCallgraphs} \pic{fig:mutualrec_program}. For each object, only its fully resolved call-graph is stored. The final step traverses the tree and collects all the cycles in a list of special objects of type \textit{CallChain}. This object represents the sequence of fully-qualified method names that when called would never terminate. Finally, each of such call chains are presented to the user in the form of human-readable strings. 
 
 \begin{figure}
     \begin{lstlisting}[language=Scala]
@@ -180,15 +159,83 @@ We propose the following approach for detecting the methods where inlining of th
     \item We produce a \textit{revision} of the initial program representation where all the calls to the methods are inlined.
     \item In both versions, for each of the class-objects, for each method in the class-object, a set of \textit{properties} is inferred.  These properties can be thought of as an implicit contract \cite{meyer} of each method. In addition to the implicit properties, the explicit properties which come in the form of \textit{assert} statements in the source code are also taken into account. In order to infer the properties of the method, partial interpretation of its body is performed. The interpretation is limited to basic numeric operations, numeric and boolean values and method calls. The inference rules are described in greater detail in fig. \ref{fig:props}.
     \item After all the properties are inferred, the following predicate should hold true for both the initial and the revised versions:
-          \begin{align*}
+          \begin{align}
               P_{init} \implies P_{rev}
-          \end{align*}
+              \label{fig:implication}
+          \end{align}
           If it doesn't hold for some class-object, it means that the revision of one of its superclasses introduces a breaking change, which weakens the precondition of some its methods.
 \end{enumerate}
 
 \begin{figure}
-    \includegraphics[width=\textwidth]{figs/properties}
-    \caption{Rules for property inference in detection of unjustified assumption in subclass.}
-    \label{fig:props}
+  \includegraphics[width=\textwidth]{figs/properties}
+  \caption{Rules for property inference in detection of unjustified assumption in subclass.}
+  \label{fig:property_inference}
 \end{figure}
 
+
+
+\subsection{Implementation}
+Similarly to the algorithm for the detection of mutual recursion, the tree-like representation of the initial revision of the EO program is done by converting its source code to the \textit{complete object tree} (section \ref{impl:complete_object_tree}). However, in order to produce the revision of the initial program, we needed to implement the inlining procedure for EO syntax tree. This procedure can be summarised as follows:
+\begin{enumerate}
+  \item Detect all the method calls. This is already done during the construction of the complete object tree.
+  \item Replace each method call in the method body with the value of its $\varphi$-attribute (@ symbol in eo).
+  \item if the method-object that is inlined contains attributes other than $\varphi$, then:
+  \begin{enumerate}
+    \item collect these attributes into a separate object called \textit{local\_attrs}. If the attribute with such a name already exists in the object where the call is inlined, resolve the collision by adding a suffix to the newly created object. 
+    \item Add this object as a local attribute to the method-object where the call is located. 
+    \item Rewire the references to the local attributes inside the $\varphi$ attribute of the methods that is being inlined to their respective attributes in the \textit{local\_attrs} object.
+  \end{enumerate}
+
+  \item After the revision of the initial EO code is obtained, the initial object tree and the revised object tree are zipped together in a separate instance of the object tree \pic{fig:zipwithinlined}.
+
+  \item Now that we have all the necessary information about both the initial and revised versions, we need to derive their properties \pic{fig:property_inference}. These properties are encoded as SMTLIB2 \cite{smtlib} programs. We use the \textbf{scala-smtlib} \footnote{\url{https://github.com/regb/scala-smtlib}} library to programmatically construct SMTLIB2-compliant programs. These programs are stored in an auxiliary data structure \ref{fig:property_structure}. This structure has the following fields.
+  \item When this structure is constructed for both the initial and revised versions, an implication statement corresponding to the formula \pic{fig:implication} is constructed and passed to the SMT-solver backend. The backend we use in this thesis is called Princess \cite{princess}.
+  \item If the solver finds the given to be satisfiable, then there is no error and the revision is considered safe. Otherwise, the revision is considered unsafe and is reported to the user. 
+\end{enumerate}
+
+\begin{figure}
+\begin{lstlisting}[language=Scala]
+  final case class Info(
+    forall: List[SortedVar],
+    exists: List[SortedVar],
+    value: Term,
+    properties: Term
+  )
+\end{lstlisting}
+\caption{A data structure for storing the derived properties.}
+\label{fig:property_structure}
+\end{figure}
+
+\begin{figure}
+\begin{lstlisting}[language=Scala]
+  final case class MethodInfoForAnalysis(
+    selfArgName: String,
+    body: EOObj[EOExprOnly],
+    depth: Int
+  )
+
+  final case class ObjectInfoForAnalysis[P, M](
+    methods: Map[EONamedBnd, M],
+    parentInfo: Option[P],
+    name: Name,
+    indirectMethods: Map[
+      Name, 
+      MethodInfoForAnalysis
+    ],
+    allMethods: Map[
+      Name, 
+      MethodInfoForAnalysis
+    ]
+  )
+
+  type AnalysisInfo = ObjectInfoForAnalysis[
+    LinkToParent,
+    MethodInfo
+  ]
+  type InitialAndRevised = ObjectTree[
+      (AnalysisInfo, AnalysisInfo)
+    ]
+\end{lstlisting}
+\caption{The object tree used in unjustufied assumption analysis that holds the revised version of the object together with the initial version.}
+\label{fig:zipwithinlined}
+\end{figure}

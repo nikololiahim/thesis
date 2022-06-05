@@ -1,3 +1,32 @@
 \chapter{Methodology}
 \label{chap:met}
 
+This chapter describes the organization of the research and implementation process. Section \ref{met:research} describes the research process that preceeded the implementation. Section \ref{met:development} covers the tools and technologies used in the project. Finally, section \ref{met:module_structure} gives a brief overview of the project module structure. 
+
+\section{Research}
+\label{met:research}
+First of all, we studied the fragile base class problems, identifying which ones would be the most appropriate to implement. After we have settled on unanticipated mutual recursion and unjustified assumption in subclass, started devising the algorithms alongside the test cases that were used mostly for reference. These example test cases later became the part of the final test suite of the analyzers. After the algorithms were refined and approved by the supervisor, we proceeded with the implementation.
+
+\section{Development}
+\label{met:development}
+We decided to host the git \cite{git} source code repository of our project on Github \footnote{\url{https://github.com/}}. This was done mostly because the team was already familiar with the platform and all the necessary setup required minimum efforts. Another aspect of Github that attracted our attention was the the feature called Github Actions \footnote{\url{https://github.com/features/actions}}. This feature allowed to easily develop and integrate continuous integration \cite{ci} and continuous deployment \cite{cd} pipelines into our repository without the need for the self-hosted solutions. These pipelines were configured to run on every push to the master branch, rejecting the push if the source code failed the tests, compilation, or linting. This configuration ensures that the code in the master meets the quality guidelines at all times during the development process. 
+
+The implementation of the analyzers was done entirely in \textbf{Scala} \footnote{\url{https://www.scala-lang.org/}} - a modern programming language with support for high-level concepts such as structural pattern matching \cite{pattern_matching} and algebraic data types \cite{adts}. Scala is compiled into Java Virtual Machine (JVM) byte code. This allows the implementation to be used as a library in any other project compatible with JVM, be it Scala or Java. In addition, programs compiled to JVM byte code can be run without changes on any device that can run Java Virtual Machine.
+
+The project uses a build tool called \textbf{sbt} \footnote{\url{https://www.scala-sbt.org/}}, which allows compiling multiple Scala modules at once. A distinctive feature of \textbf{sbt} is the ability to cross-compile Scala code so that it is compatible with many versions of Scala and Java. It also supports a variety of plugins that improve the development process. We used two such plugins: \textbf{scalafmt} \footnote{\url{https://scalameta.org/scalafmt/}}, an automatic source code formatter, and \textbf{scalafix} \footnote{\url{https://scalacenter.github.io/scalafix/}} , a linter and code analyzer with support for project-wide refactorings.
+
+The analyzers are published as a \textbf{JAR} \footnote{\url{https://docs.oracle.com/javase/7/docs/technotes/guides/jar/jar.html}} and can be downloaded from the \textbf{Maven Central} repository \footnote{\url{https://search.maven.org/search?q=g:org.polystat.odin}}.
+
+The source code of the project is available on \textbf{Github} \footnote{\url{https://github.com/polystat/odin}}. It also provides the instructions on how to launch and contribute to the project.
+
+
+\section{Module Structure}
+\label{met:module_structure}
+The source code of the analyzers was divided into several modules:
+\begin{itemize}
+    \item Core, which contains the definition for EO AST (Abstract Syntax Tree).
+          This AST is used as an input to all analysis algorithms.
+    \item Analyses, which contains the implementations of the analyzers.
+    \item Backends, which contains algorithms that transform EO AST into something else. The only backend so far is a plain text backend: it transforms EO AST into its syntactically correct equivalent in EO source code. This backend can also be interpreted as a pretty-printer of EO code and is widely used as such in other modules.
+    \item Parser, which contains a parser (also known as a syntactic analyzer) of EO source code. It is used to convert different EO representations (e.g. plain text or XML encoding) into the EO AST defined in Core module.
+\end{itemize}

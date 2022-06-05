@@ -118,9 +118,9 @@ The return value of the method is represented by the value of the $\varphi$ attr
 Unanticipated mutual recursion is a problem that occurs as a result of unconstrained inheritance. Suppose we have an object named Base with two methods - $f$ and $g$. Method $g$ calls method $f$, whereas $f$ does not.
 
 
-Then, there is a class called Derived that extends Base and redefines the method $f$ in a way that it calls $g$. When we call a method $f$ on an instance of Derived, we get a stack overflow error: method $f$ calls method $g$, method $g$ calls method $f$ and so on (figure \ref{fig:mutualrec_basic}).
+Then, there is a class called Derived that extends Base and redefines the method $f$ in a way that it calls $g$. When we call a method $f$ on an instance of Derived, we get a stack overflow error: method $f$ calls method $g$, method $g$ calls method $f$ and so on \pic{fig:mutualrec_basic}.
 
-It is important to note that we are not interested in detecting mutual recursion between the two methods of the same class. We are only interested the cases where mutual recursion occurs as a result of redefining one of the methods of the superclass. The example in fig. \ref{fig:oddeven} shows the class with two mutually-recursive methods "isOdd" and "isEven". In this case the recursion is anticipated and necessary, so it is not a defect.
+It is important to note that we are not interested in detecting mutual recursion between the two methods of the same class. We are only interested the cases where mutual recursion occurs as a result of redefining one of the methods of the superclass. The example \pic{fig:oddeven} shows the class with two mutually-recursive methods \textit{isOdd} and \textit{isEven}. In this case the recursion is anticipated and necessary, so it is not a defect.
 
 \begin{figure}
     \centering

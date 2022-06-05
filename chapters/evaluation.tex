@@ -21,7 +21,7 @@ The current implementation of the mutual recursion analyzer also contains a bug 
   \lstinputlisting{code/inheritance_chain.eo}
     \end{tabular}
   \end{center}
-  \caption{A simple example of the cycle in the inheritance chain. Object $a$ extends $b$, which in turn extends object $a$.}
+  \caption{A simple example of the cycle in the inheritance chain as it occurs in EO. Object $a$ extends $b$, which in turn extends object $a$.}
   \label{fig:inheritance_chain}
 \end{figure}
 
@@ -34,7 +34,7 @@ Finally, the complexity of the constraints the solver needs to decide grows line
 
 \section{Testing}
 \label{eval:testing}
-The implementation is largely covered by hand-written integration tests. For mutual-recursion, the property-based testing technique \cite{property_based_testing} was also applied to ensure the extensive coverage of the input domain.
+The implementation is largely covered by hand-written integration tests. The property-based testing technique \cite{property_based_testing} was also applied to the testing of the mutual recursion analyzer to ensure the extensive coverage of the input domain.
 
 \subsection{Integration Testing}
 \label{eval:integration_testing}

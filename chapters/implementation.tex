@@ -153,6 +153,7 @@ The first step of the algorithm in \ref{impl:mutualrec_algo} is covered by conve
 \label{impl:unjustified}
 
 \subsection{Proposed Solution}
+\label{impl:unjustified_algo}
 We propose the following approach for detecting the methods where inlining of the calls may lead to breaking changes in subclasses:
 \begin{enumerate}
     \item An \textit{initial} representation of the program is produced. This representation is a tree-like data structure which preserves the nesting relations between objects. So, the objects which contain other objects are the roots of their respective subtrees, whereas the container objects are the subtrees or leaves.

@@ -1,5 +1,26 @@
 \chapter{Conclusion}
 \label{chap:conclusion}
 
+Nowadays, object-oriented programming paradigm is one of the most dominant tools in the arsenal of software companies. The attempts to keep up with the ever-increasing demand for innovation lead to the inevitable rise in the software complexity. The object-oriented codebases arguably suffered the most from this complexity, giving rise to phenomena such as "legacy code" \cite{legacy}. There are many existing approaches for taming this complexity. One of the most commonly used is called static analysis - reasoning about the code without executing it. 
 
-\ldots
+This thesis described an innovative approach to the static analysis of object-oriented programs involving $\varphi$-calculus - a formalization of the object-oriented semantics based on the idea of the decorator pattern \cite{GOFPatterns}. We studied the existing works on $\varphi$-calculus and its implementation, EO \cite{eolang}, described one of the variations of $\varphi$-calculus and applied it to building a static analyzer that detects the problems of the "fragile base class" \cite{fragilebaseclass} family. The implementation was documented and the source code  was published to an open source Github repository.
+
+The analyzer has been extensively tested using hand-written examples. There are currently 89 tests being run in the continuous integration pipeline, some of them approaching 700 lines of EO code. 
+
+\section{Contribution Summary}
+\begin{itemize}
+    \item A parser for a subset of EO grammar described in \cite{eolang}.
+    \item A set of useful data structures for analyzing the programs translated to the EO intermediate representation. 
+    \item Two algorithms that use the above data structures to detect two defects of the "fragile base class" family - unanticipated mutual recursion and unjustified assumption in subclass.
+\end{itemize}
+
+\section{Future Work}
+A significant body of work was done, however there are still problems to be solved before the analyzers that use the approach described in this thesis can find defects in industrial-scale object-oriented codebases. 
+
+\begin{itemize}
+    \item The analyzers described in this thesis need to be coupled with a translator from the target language (e.g. Java) to the EO intermediate representation. We are aware of several of several existing works in this area, however little work was done to make them work together with the analyzers.
+    \item Performing complicated analyses such as detecting of unjustified assumption in subclass is significantly crippled by the lack of type checker in EO. Having information about the object types during the analysis would make the process of constraint inference such as the one described in \ref{impl:unjustified_algo} more robust and precise. 
+    \item The analyzers run successfully on small test cases, however testing them on bigger bodies of EO code, e.g. generated from the existing Java source code, may reveal critical flaws in the current design, as well as the performance bottlenecks that are hard to detect on smaller test cases. 
+    \item The current design of the analyzers does not take into account the error reporting, so its current capabilities are limited to fully-qualified names of the objects where the errors occurred. The design needs to be revised to make error messages point to the exact locations of errors in the EO intermediate representation and conseqiently in the target language source code.
+\end{itemize}
+

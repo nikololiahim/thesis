@@ -3,9 +3,8 @@
 \chaptermark{Second Chapter Heading}
 This chapter presents oveview of the theoretical concepts that the implementation relies on. Section \ref{lit:phicalc} briefly describes the relevant parts of $\varphi$-calculus: its syntax and semantics. Section \ref{lit:eo} explains how $\varphi$-calculus maps to EO, the intermediate representation the analyzers operate on. Section \ref{lit:encoding} shows how to encode basic object-oriented constructs (classes, methods, inheritance) by means of EO. 
 
-\section{Navigation}
-
 \section{Methods \& Criteria}
+The works surrounding $varphi$-calculus and EO appeared fairly recently and are largely not published. The works that are already published were provided by the supervisor. The preprints of the unpublished works were kindly provided by the authors. 
 
 \section{$\varphi$-calculus}
 \label{lit:phicalc}
@@ -94,7 +93,7 @@ EOLANG, or simply EO, is a programming language created by Bugayenko \cite{eolan
 
 \section{Describing object-oriented programs with EO}
 \label{lit:encoding}
-Before analyzing programs written in object-oriented programming languages, it is necessary to translate them into EO while preserving the semantics of the original language. This chapter presents a simplified version of such an encoding that is assumed by analyzers described in this thesis.
+Before analyzing programs written in object-oriented programming languages, it is necessary to translate them into EO while preserving the semantics of the original language. This section presents a simplified version of such an encoding that is assumed by analyzers described in this thesis. The encoding was largely insipired by \cite{bugayenko_reducing_2021} with some changes aimed mostly at simplifying the analysis process.
 
 \subsection{Classes}
 Classes are modelled as closed EO objects. Class-level (i.e. "static") attributes become attributes of the class object. Constructor is represented by an attribute-object "new" of the class object. This object may take parameters to produce an instance of the object.
@@ -105,11 +104,12 @@ by applying the "new" object to the required parameters.
 \subsection{Methods}
 Methods are modelled as EO objects, similarly to classes. These objects can take parameters.
 Instance methods are required to accept a special \textbf{self} attribute in addition to other parameters. This parameter is used to pass an instance of the object calling the method (hence the name - "self").
-"self" parameter can be used to call instance methods inside other instance methods.
+"self" parameter can be used to call instance methods inside other instance methods. The call to the method takes the following form:
+\begin{lstlisting}
+    self.method_name self arg1 arg2, etc.
+\end{lstlisting}
 
 The return value of the method is represented by the value of the $\varphi$ attribute ("@" symbol in EO). In order to call the instance method we need to instantiate the object first. Then we can call the method by accessing the instance's attribute with the method name and passing the instance object to it as the first argument.
-
-
 
 
 \section{Fragile Base Class Problem}

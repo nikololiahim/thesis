@@ -158,7 +158,7 @@ We propose the following approach for detecting the methods where inlining of th
 \begin{enumerate}
     \item An \textit{initial} representation of the program is produced. This representation is a tree-like data structure which preserves the nesting relations between objects. So, the objects which contain other objects are the roots of their respective subtrees, whereas the container objects are the subtrees or leaves.
     \item We produce a \textit{revision} of the initial program representation where all the calls to the methods are inlined.
-    \item In both versions, for each of the class-objects, for each method in the class-object, a set of \textit{properties} is inferred.  These properties can be thought of as an implicit contract \cite{meyer} of each method. In addition to the implicit properties, the explicit properties which come in the form of \textit{assert} statements in the source code are also taken into account. In order to infer the properties of the method, partial interpretation of its body is performed. The interpretation is limited to basic numeric operations, numeric and boolean values and method calls. The inference rules are described in greater detail in fig. \ref{fig:props}.
+    \item In both versions, for each of the class-objects, for each method in the class-object, a set of \textit{properties} is inferred.  These properties can be thought of as an implicit contract \cite{meyer} of each method. In addition to the implicit properties, the explicit properties which come in the form of \textit{assert} statements in the source code are also taken into account. In order to infer the properties of the method, partial interpretation of its body is performed. The interpretation is limited to basic numeric operations, numeric and boolean values and method calls. The inference rules are described in greater detail in fig. \ref{fig:property_inference}.
     \item After all the properties are inferred, the following predicate should hold true for both the initial and the revised versions:
           \begin{align}
               P_{init} \implies P_{rev}
@@ -172,7 +172,6 @@ We propose the following approach for detecting the methods where inlining of th
   \caption{Rules for property inference in detection of unjustified assumption in subclass.}
   \label{fig:property_inference}
 \end{figure}
-
 
 
 \subsection{Implementation}

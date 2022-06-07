@@ -98,7 +98,7 @@ Before analyzing programs written in object-oriented programming languages, it i
 \subsection{Classes}
 Classes are modelled as closed EO objects. Class-level (i.e. "static") attributes become attributes of the class object. Constructor is represented by an attribute-object "new" of the class object. This object may take parameters to produce an instance of the object.
 
-All instance attributes and methods are defined inside the object returned by the "new" object. Inheritance is modelled as decoration in EO. So, a full example of EO translation would look like this. Class instances (a.k.a objects in Java) are created
+All instance attributes and methods are defined inside the object returned by the "new" object. Inheritance is modelled as decoration in EO. Class instances (a.k.a objects in Java) are created
 by applying the "new" object to the required parameters.
 
 \subsection{Methods}
@@ -111,7 +111,8 @@ Instance methods are required to accept a special \textbf{self} attribute in add
 
 The return value of the method is represented by the value of the $\varphi$ attribute ("@" symbol in EO). In order to call the instance method we need to instantiate the object first. Then we can call the method by accessing the instance's attribute with the method name and passing the instance object to it as the first argument.
 
-
+\subsection{Examples of translation}
+The examples of such translation applied to simple Java programs can be found in the subsequent sections, namely figures \ref{fig:mutualrec_basic} and \ref{fig:unjustified_before}.
 \section{Fragile Base Class Problem}
 
 \subsection{Unanticipated Mutual Recursion}

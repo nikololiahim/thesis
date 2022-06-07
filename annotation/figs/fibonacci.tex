@@ -1,0 +1,23 @@
+% fib ->
+%   [ n -> ?
+%   , @ -> n.less(_1 -> 2).if(
+%       _1 -> n
+%     )(
+%       _2 -> fib(n -> n.sub(_1 -> 1)).add(_1 -> fib(n -> n.sub(_1 -> 2)))
+%     )
+%   ]
+% ].fib(n -> 7)
+\begin{figure}
+    \begin{align*}
+        fib := &\mkObject{                                    \\
+            n &\mapsto \mkObject{},                           \\
+            \varphi &\mapsto \rho^0.n.less(n \mapsto 2).if( \\
+            &ifTrue \mapsto n,                                \\
+            &ifFalse \mapsto                                  \\
+            &fib(n \mapsto \rho^0.n.sub(n \mapsto 1))\\
+            &.add(n \mapsto fib(n \mapsto \rho^0.n.sub(n \mapsto2)\\)\\)\\)\\
+        }
+    \end{align*}
+    \caption{Fibonacci numbers in $\varphi$-calculus}
+    \label{fig:fibo}
+\end{figure}

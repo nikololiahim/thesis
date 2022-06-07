@@ -1,0 +1,16 @@
+[] > c
+  [self v] > l
+    seq > @
+      (*@ \colorbox{light-gray}{assert (v.less 5)} @*)
+      (*@ \colorbox{light-gray}{v} @*)
+  [self v] > m
+    self.l self v > @
+  [self v] > n
+    v > @
+
+[] > m
+  c > @
+  [self v] > l
+    v > @
+  [self v] > n
+    self.m self v > @

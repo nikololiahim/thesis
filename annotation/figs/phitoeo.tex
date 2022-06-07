@@ -1,0 +1,27 @@
+\begin{figure}
+    \begin{center}
+        \begin{tabular}{|c|c|c|}
+            \hline
+                                & $\varphi$-исчисление         & EO \\
+            \hline
+            Объекты             & $obj := \mkObject{a \mapsto x, b \mapsto y}$ &  \lstinputlisting{code/objects.eo}\\
+            \hline
+            Свободные атрибуты     &   $point := \mkObject{x \mapsto \mkObject{}, y \mapsto \mkObject}$   &  \lstinputlisting{code/free_attributes.eo}   \\
+            \hline
+            Аппликация &     $a := point(x \mapsto 1, y \mapsto 2)$ & \lstinputlisting{code/application.eo} \\
+            \hline
+            $\varphi$-атрибут & $x := \mkObject{\varphi \mapsto a, c \mapsto g}$ & \lstinputlisting{code/phi_attribute.eo}   \\
+            \hline
+            Пример с числами Фибоначчи & Fig. \ref{fig:fibo} & \lstinputlisting{code/fibonacci.eo}   \\
+            \hline
+            $\rho^0$ & $\rho^0$ &  \$ \\
+            \hline
+            $\rho^1$ & $\rho^1$ &  \textasciicircum \\
+            \hline
+            $\rho^3$ & $\rho^3$ &  \textasciicircum.\textasciicircum.\textasciicircum \\
+            \hline
+        \end{tabular}
+    \end{center}
+    \caption{Отображение $\varphi$-исчисления в EO}
+    \label{fig:phitoeo}
+\end{figure}

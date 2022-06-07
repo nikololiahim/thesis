@@ -1,0 +1,13 @@
+[] > numeric_ops
+  [self n] > is_even
+    ($.n.eq 0).if > @
+      1
+      $.self.is_odd
+        $.self
+        ($.n.sub 1)
+  [self n] > is_odd
+    ($.n.eq 0).if > @
+      0
+      $.self.is_even
+        $.self
+        ($.n.sub 1)

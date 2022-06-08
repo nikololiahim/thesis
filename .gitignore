@@ -13,3 +13,4 @@
 **/*.toc
 **/*.xdv
 .metals/
+move.sh
